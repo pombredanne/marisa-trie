@@ -1,8 +1,11 @@
-marisa-trie
+marisa-trie |travis| |appveyor|
 ===========
 
-.. image:: https://travis-ci.org/kmike/marisa-trie.png?branch=master
-    :target: https://travis-ci.org/kmike/marisa-trie
+.. |travis| image:: https://travis-ci.org/kmike/marisa-trie.png
+   :target: https://travis-ci.org/kmike/marisa-trie
+
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/uj38n3d09rtwbbbg?svg=true
+   :target: https://ci.appveyor.com/project/superbobry/marisa-trie
 
 Static memory-efficient Trie-like structures for Python (2.x and 3.x).
 
@@ -246,6 +249,14 @@ make trie functions return results in alphabetical oder::
 
     >>> trie = marisa_trie.RecordTrie(fmt, data, order=marisa_trie.LABEL_ORDER)
 
+Note that two tries constructed from identical data but with different ``order``
+arguments will compare unequal::
+
+    >>> t1 = marisa_trie.Trie(order=marisa_trie.LABEL_ORDER)
+    >>> t2 = marisa_trie.Trie(order=marisa_trie.WEIGHT_ORDER)
+    >>> t1 == t2
+    False
+
 
 Benchmarks
 ==========
@@ -363,15 +374,9 @@ Contributions are welcome!
 Contributing
 ============
 
-Development happens at github and bitbucket:
+Development happens at github: https://github.com/kmike/marisa-trie
 
-* https://github.com/kmike/marisa-trie
-* https://bitbucket.org/kmike/marisa-trie
-
-The main issue tracker is at github: https://github.com/kmike/marisa-trie/issues
-
-Feel free to submit ideas, bugs, pull requests (git or hg) or
-regular patches.
+Feel free to submit ideas, bug reports and pull requests.
 
 If you found a bug in a C++ part please report it to the original
 `bug tracker <https://code.google.com/p/marisa-trie/issues/list>`_.
@@ -401,7 +406,8 @@ Make sure `tox`_ is installed and run
 
     $ tox
 
-from the source checkout. Tests should pass under python 2.6, 2.7, 3.2 and 3.3.
+from the source checkout. Tests should pass under python 2.6, 2.7,
+3.2, 3.3 and 3.4.
 
 In order to run benchmarks, type
 
@@ -418,6 +424,7 @@ Authors & Contributors
 
 * Mikhail Korobov <kmike84@gmail.com>
 * `Matt Hickford <https://github.com/matt-hickford>`_
+* Sergei Lebedev <superbobry@gmail.com>
 
 This module is based on `marisa-trie`_ C++ library by
 Susumu Yata & contributors.

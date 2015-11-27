@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-import tempfile
+
 import pickle
+import sys
+import tempfile
 
 import pytest
 
@@ -99,6 +101,8 @@ def test_saveload():
         assert word in trie2
 
 
+@pytest.mark.skipif(sys.platform == "win32",
+                    reason="unsupported by the C++ library")
 def test_mmap():
     fd, fname = tempfile.mkstemp()
     words = get_random_words(1000)
@@ -135,6 +139,34 @@ def test_pickling():
     for word in words:
         assert word in trie2
         assert trie2.key_id(word) == trie.key_id(word)
+
+
+def test_cmp():
+    trie = marisa_trie.Trie()
+    assert trie == trie
+    assert trie == marisa_trie.Trie()
+
+    trie = marisa_trie.Trie(["foo", "bar"])
+    assert trie == marisa_trie.Trie(["foo", "bar"])
+    assert trie != marisa_trie.Trie(["foo", "boo"])
+
+    lo_trie = marisa_trie.Trie(order=marisa_trie.LABEL_ORDER)
+    wo_trie = marisa_trie.Trie(order=marisa_trie.WEIGHT_ORDER)
+    assert lo_trie == lo_trie and wo_trie == wo_trie
+    assert lo_trie != wo_trie
+
+    with pytest.raises(TypeError):
+        marisa_trie.Trie() < marisa_trie.Trie()
+
+    with pytest.raises(TypeError):
+        marisa_trie.Trie() > marisa_trie.Trie()
+
+    # not sure if it makes sense copy-pasting further.
+
+
+def test_iter():
+    trie = marisa_trie.Trie(["foo", "bar"])
+    assert list(trie) == list(trie.iterkeys())
 
 
 def test_len():

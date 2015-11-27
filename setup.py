@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import glob
 import itertools
-from distutils.core import setup
+from setuptools import setup
 from distutils.extension import Extension
 
 MARISA_FILES = [
@@ -16,7 +16,7 @@ MARISA_FILES = list(itertools.chain(*(glob.glob(path) for path in MARISA_FILES))
 
 setup(
     name="marisa-trie",
-    version="0.6",
+    version="0.7.2",
     description="Static memory-efficient & fast Trie-like structures for Python (based on marisa-trie C++ library)",
     long_description = open('README.rst').read() + "\n\n" + open('CHANGES.rst').read(),
     author='Mikhail Korobov',
@@ -45,6 +45,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Scientific/Engineering :: Information Analysis',
