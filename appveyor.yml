@@ -24,22 +24,6 @@ environment:
       PYTHON_VERSION: "2.7.x"
       PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python33"
-      PYTHON_VERSION: "3.3.x"
-      PYTHON_ARCH: "32"
-
-    - PYTHON: "C:\\Python33-x64"
-      PYTHON_VERSION: "3.3.x"
-      PYTHON_ARCH: "64"
-
-    - PYTHON: "C:\\Python34"
-      PYTHON_VERSION: "3.4.x"
-      PYTHON_ARCH: "32"
-
-    - PYTHON: "C:\\Python34-x64"
-      PYTHON_VERSION: "3.4.x"
-      PYTHON_ARCH: "64"
-
     - PYTHON: "C:\\Python35"
       PYTHON_VERSION: "3.5.x"
       PYTHON_ARCH: "32"
@@ -48,23 +32,46 @@ environment:
       PYTHON_VERSION: "3.5.x"
       PYTHON_ARCH: "64"
 
+    - PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "64"
+
 install:
+  - git submodule update --init --recursive
+
   # Install Python (from the official .msi of http://python.org) and pip when
   # not already installed.
-  - "powershell ./continuous_integration/appveyor/install.ps1"
+  - ps: if (-not(Test-Path($env:PYTHON))) { & appveyor\install.ps1 }
+
+  # Prepend newly installed Python to the PATH of this build (this cannot be
+  # done from inside the powershell script as it would require to restart
+  # the parent CMD process).
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+
+  # Upgrade to the latest version of pip to avoid it displaying warnings
+  # about it being out of date.
+  - "pip install --disable-pip-version-check --user --upgrade pip"
 
   # Install the build and runtime dependencies of the project.
   - "%CMD_IN_ENV% pip install --timeout=60 -r continuous_integration/appveyor/requirements.txt"
-  - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
 
-  # Install the genreated wheel package to test it
-  - "pip install --pre --no-index --find-links dist/ marisa-trie"
-
-build: false
+build_script:
+  # Build the compiled extension
+  - "%CMD_IN_ENV% python setup.py build"
 
 test_script:
-  - "%CMD_IN_ENV% py.test"
+  - "%CMD_IN_ENV% python setup.py test"
+
+after_test:
+  # If tests are successful, create a wheel for the project.
+  - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
+
+  # Install the genereated wheel package.
+  - "%CMD_IN_ENV% pip install --pre --no-index --find-links dist/ marisa-trie"
 
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.

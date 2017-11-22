@@ -2,6 +2,26 @@
 CHANGES
 =======
 
+0.7.4 (2017-03-27)
+------------------
+
+* Fixed packaging issue, ``MANIFEST.in`` was not updated after ``libmarisa-trie``
+  became a submodule.
+
+
+0.7.3 (2017-02-14)
+------------------
+
+* Added ``BinaryTrie`` for storing arbitrary sequences of bytes, e.g. IP
+  addresses (thanks Tomasz Melcer);
+* Deprecated ``Trie.has_keys_with_prefix`` which can be trivially implemented in
+  terms of ``Trie.iterkeys``;
+* Deprecated ``Trie.read`` and ``Trie.write`` which onlywork for "real" files
+  and duplicate the functionality of ``load`` and ``save``. See issue #31 on
+  GitHub;
+* Updated ``libmarisa-trie`` to the latest version. Yay, 64-bit Windows support.
+* Rebuilt Cython wrapper with Cython 0.25.2.
+
 0.7.2 (2015-04-21)
 ------------------
 
