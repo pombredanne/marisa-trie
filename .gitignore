@@ -1,7 +1,7 @@
 MANIFEST
 src/*.html
 docs/_build
-
+venv*
 *.py[cod]
 
 # C extensions
@@ -32,3 +32,7 @@ pip-log.txt
 .cache
 .tox
 nosetests.xml
+
+# IDE
+.idea
+.vscode

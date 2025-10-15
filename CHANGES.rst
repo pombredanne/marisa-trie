@@ -2,12 +2,100 @@
 CHANGES
 =======
 
+1.3.2-dev (2025-xx-xx)
+----------------------
+
+* 
+
+1.3.1 (2025-08-26)
+------------------
+
+* Set the Cython language level to "3" (#126)
+
+1.3.0 (2025-08-16)
+------------------
+
+* Updated ``libmarisa-trie`` to the latest version (0.2.7) (#116).
+* Dropped Python 3.7, 3.8 support (#112, #120).
+* Added Python 3.13 support (#112).
+* Rebuild Cython wrapper with Cython 3.1.3 (#119, [4d564de](4d564de332191c3fe33aa2240cae2494c597bba2)).
+* Moved static project metadata to ``pyproject.toml`` (#120).
+* Updated metadata license to include the bundled one from marisa-trie as well (#120).
+* Add Cython as build dependency (#122).
+
+1.2.1 (2024-10-12)
+------------------
+
+* Publish Python 3.13 wheels (only CPython ones, PyPy ones are skipped until https://github.com/pypa/distutils/issues/283 is fixed).
+* Rebuild Cython wrapper with Cython 3.0.11.
+
+1.2.0 (2024-06-05)
+------------------
+
+* Added Python 3.13 support (#105).
+* Rebuild Cython wrapper with Cython 3.0.10 (#105).
+
+1.1.1 (2024-05-06)
+------------------
+
+* Publish Linux aarch64 wheels (#101).
+
+1.1.0 (2023-10-06)
+------------------
+
+* Added Python 3.12 support.
+
+1.0.0 (2023-09-03)
+------------------
+
+* Dropped Python 2.7, 3.4, 3.5, 3.6 support.
+* Added ``Trie.map()`` (#90).
+* Rebuilt Cython wrapper with Cython 3.0.2.
+* Fixed benchmark documentation typos (#89).
+
+0.8.0 (2023-03-25)
+------------------
+
+* Add ``Trie.iter_prefixes_with_ids()`` method to return ``(prefix, id)`` pairs (#83).
+* Rebuild Cython wrapper with Cython 0.29.33 (#88).
+
+0.7.8 (2022-10-25)
+------------------
+
+* Added Python 3.11 support.
+* Rebuild Cython wrapper with Cython 0.29.32.
+
+0.7.7 (2021-08-04)
+------------------
+
+* Restored Python 2.7 support.
+* Fixed README image references not working on Windows.
+
+0.7.6 (2021-07-28)
+------------------
+
+* Wheels are now published for all platforms.
+* Fixed ``ResourceWarning: unclosed file`` in ``setup.py``.
+* Run ``black`` on the entire source code.
+* Moved the QA/CI to GitHub.
+* Rebuild Cython wrapper with Cython 0.29.24.
+* Updated ``libmarisa-trie`` to the latest version (0.2.6).
+* Fixed failing tests and usage of deprecated methods.
+* Expanded supported Python version (2.7, 3.4 - 3.10).
+
+0.7.5 (2018-04-10)
+------------------
+
+* Removed redundant ``DeprecationWarning`` messages in ``Trie.save`` and
+  ``Trie.load``.
+* Dropped support for Python 2.6.
+* Rebuild Cython wrapper with Cython 0.28.1.
+
 0.7.4 (2017-03-27)
 ------------------
 
 * Fixed packaging issue, ``MANIFEST.in`` was not updated after ``libmarisa-trie``
   became a submodule.
-
 
 0.7.3 (2017-02-14)
 ------------------

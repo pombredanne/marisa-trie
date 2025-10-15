@@ -1,13 +1,18 @@
-marisa-trie |travis| |appveyor|
-===============================
+MARISA Trie
+===========
 
-.. |travis| image:: https://travis-ci.org/pytries/marisa-trie.svg
-   :target: https://travis-ci.org/pytries/marisa-trie
+|PyPI Version|
+|PyPI Status|
+|PyPI Python Versions|
+|Github Build Status|
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/p887ad4jbdg6u7yo?svg=true
-   :target: https://ci.appveyor.com/project/superbobry/marisa-trie-75wx1
+.. tip::
 
-Static memory-efficient Trie-like structures for Python (2.x and 3.x)
+    Become **my boss** to help me work on this awesome software, and make the world better:
+
+   |Patreon|
+
+Static memory-efficient Trie-like structures for Python (3.9+)
 based on `marisa-trie`_ C++ library.
 
 String data in a MARISA-trie may take up to 50x-100x less memory than
@@ -27,12 +32,15 @@ Installation
 
 ::
 
-    pip install marisa-trie
+    python -m pip install -U marisa-trie
 
 Usage
 =====
 
-See :ref:`Tutorial <tutorial>` and :ref:`API <api>` for details.
+See `tutorial`_ and `API`_ for details.
+
+.. _tutorial: https://marisa-trie.readthedocs.io/en/latest/tutorial.html
+.. _API: https://marisa-trie.readthedocs.io/en/latest/api.html
 
 Current limitations
 ===================
@@ -50,4 +58,15 @@ License
 Wrapper code is licensed under MIT License.
 
 Bundled `marisa-trie`_ C++ library is dual-licensed under
-LGPL and BSD 2-clause license.
+LGPL or BSD 2-clause license.
+
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/marisa-trie.svg
+   :target: https://pypi.python.org/pypi/marisa-trie/
+.. |PyPI Status| image:: https://img.shields.io/pypi/status/marisa-trie.svg
+   :target: https://pypi.python.org/pypi/marisa-trie/
+.. |PyPI Python Versions| image:: https://img.shields.io/pypi/pyversions/marisa-trie.svg
+   :target: https://pypi.python.org/pypi/marisa-trie/
+.. |Github Build Status| image:: https://github.com/pytries/marisa-trie/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/pytries/marisa-trie/actions/workflows/tests.yml
+.. |Patreon| image:: https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white
+   :target: https://www.patreon.com/mschoentgen

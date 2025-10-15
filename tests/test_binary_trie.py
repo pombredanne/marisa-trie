@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
 import pickle
-from collections import Mapping
+from collections.abc import Mapping
+from uuid import uuid4
 
 import pytest
 import hypothesis.strategies as st
-from hypothesis import given, assume
+from hypothesis import given, assume, settings, HealthCheck
 
 import marisa_trie
-
 
 text = st.binary()
 
@@ -75,33 +71,31 @@ def test_get(keys):
         assert trie.restore_key(key_id) == key
 
     assert trie.get(b"non_existing_bytes_key") is None
-    assert trie.get(b"non_existing_bytes_key",
-                    "default value") == "default value"
+    assert trie.get(b"non_existing_bytes_key", "default value") == "default value"
 
 
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(st.sets(text))
-def test_saveload(tmpdir, keys):
+def test_saveload(tmp_path, keys):
     trie = marisa_trie.BinaryTrie(keys)
 
-    path = str(tmpdir.join("trie.bin"))
-    with open(path, "wb") as f:
-        trie.write(f)
+    path = str(tmp_path / f"{uuid4()}.bin")
+    trie.save(path)
 
-    with open(path, "rb") as f:
-        trie2 = marisa_trie.BinaryTrie()
-        trie2.read(f)
+    trie2 = marisa_trie.BinaryTrie()
+    trie2.load(path)
 
     for key in keys:
         assert key in trie2
 
 
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(st.sets(text))
-def test_mmap(tmpdir, keys):
+def test_mmap(tmp_path, keys):
     trie = marisa_trie.BinaryTrie(keys)
 
-    path = str(tmpdir.join("trie.bin"))
-    with open(path, "wb") as f:
-        trie.write(f)
+    path = str(tmp_path / f"{uuid4()}.bin")
+    trie.save(path)
 
     trie2 = marisa_trie.BinaryTrie()
     trie2.mmap(path)
@@ -207,7 +201,7 @@ def test_keys():
 def test_keys_prefix():
     keys = [b"foo", b"f", b"foobar", b"bar"]
     trie = marisa_trie.BinaryTrie(keys)
-    assert set(trie.keys(b"fo")) == set([b"foo", b"foobar"])
+    assert set(trie.keys(b"fo")) == {b"foo", b"foobar"}
     assert trie.keys(b"foobarz") == []
 
 
@@ -231,10 +225,10 @@ def test_items():
 def test_items_prefix():
     keys = [b"foo", b"f", b"foobar", b"bar"]
     trie = marisa_trie.BinaryTrie(keys)
-    assert set(trie.items(b"fo")) == set([
+    assert set(trie.items(b"fo")) == {
         (b"foo", trie[b"foo"]),
         (b"foobar", trie[b"foobar"]),
-    ])
+    }
 
 
 @given(st.sets(text))
@@ -247,10 +241,11 @@ def test_iteritems(keys):
         assert trie.items(prefix) == list(trie.iteritems(prefix))
 
 
+@pytest.mark.filterwarnings("ignore:Trie.has_keys_with_prefix is deprecated")
 def test_has_keys_with_prefix_empty():
     empty_trie = marisa_trie.BinaryTrie()
-    assert not empty_trie.has_keys_with_prefix(b'')
-    assert not empty_trie.has_keys_with_prefix(b'ab')
+    assert not empty_trie.has_keys_with_prefix(b"")
+    assert not empty_trie.has_keys_with_prefix(b"ab")
 
 
 def test_invalid_file():
@@ -262,6 +257,6 @@ def test_invalid_file():
         pytest.fail("Exception is not raised")
 
 
-def test_mutable_mapping():
+def test_mapping():
     for method in Mapping.__abstractmethods__:
         assert hasattr(marisa_trie.BinaryTrie, method)

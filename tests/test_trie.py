@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
 import pickle
-from collections import Mapping
+from collections.abc import Mapping
+from uuid import uuid4
 
 import pytest
 import hypothesis.strategies as st
-from hypothesis import given, assume
+from hypothesis import given, assume, settings, HealthCheck
 
 import marisa_trie
+
 from .utils import text
 
 
@@ -78,36 +76,66 @@ def test_get(keys):
     assert trie.get("non_existing_key") is None
     assert trie.get(b"non_existing_bytes_key") is None
     assert trie.get("non_existing_key", "default value") == "default value"
-    assert trie.get(b"non_existing_bytes_key",
-                    "default value") == "default value"
+    assert trie.get(b"non_existing_bytes_key", "default value") == "default value"
 
 
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(st.sets(text))
-def test_saveload(tmpdir, keys):
+def test_saveload(tmp_path, keys):
     trie = marisa_trie.Trie(keys)
 
-    path = str(tmpdir.join("trie.bin"))
-    with open(path, "wb") as f:
-        trie.write(f)
+    path = str(tmp_path / f"{uuid4()}.bin")
+    trie.save(path)
 
-    with open(path, "rb") as f:
-        trie2 = marisa_trie.Trie()
-        trie2.read(f)
+    trie2 = marisa_trie.Trie()
+    trie2.load(path)
 
     for key in keys:
         assert key in trie2
 
 
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(st.sets(text))
-def test_mmap(tmpdir, keys):
+def test_mmap(tmp_path, keys):
     trie = marisa_trie.Trie(keys)
 
-    path = str(tmpdir.join("trie.bin"))
-    with open(path, "wb") as f:
-        trie.write(f)
+    path = str(tmp_path / f"{uuid4()}.bin")
+    trie.save(path)
 
     trie2 = marisa_trie.Trie()
     trie2.mmap(path)
+
+    for key in keys:
+        assert key in trie2
+
+
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(st.sets(text))
+def test_map(tmp_path, keys):
+    trie = marisa_trie.Trie(keys)
+
+    path = str(tmp_path / f"{uuid4()}.bin")
+    trie.save(path)
+
+    data = open(path, "rb").read()
+    trie2 = marisa_trie.Trie()
+    trie2.map(data)
+
+    for key in keys:
+        assert key in trie2
+
+
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(st.sets(text))
+def test_map_with_pad(tmp_path, keys):
+    trie = marisa_trie.Trie(keys)
+
+    path = str(tmp_path / f"{uuid4()}.bin")
+    trie.save(path)
+
+    data = b"pad" + open(path, "rb").read() + b"pad"
+    trie2 = marisa_trie.Trie()
+    trie2.map(memoryview(data)[3:-3])
 
     for key in keys:
         assert key in trie2
@@ -201,6 +229,27 @@ def test_prefixes():
     assert list(trie.iter_prefixes("foobar")) == ["f", "foo", "foobar"]
 
 
+def test_iter_prefixes_with_keys():
+    trie = marisa_trie.Trie(["foo", "f", "foobar", "bar"])
+
+    assert set(trie.iter_prefixes_with_ids("foobar")) == {
+        ("f", trie["f"]),
+        ("foo", trie["foo"]),
+        ("foobar", trie["foobar"]),
+    }
+    assert set(trie.iter_prefixes_with_ids("foo")) == {
+        ("f", trie["f"]),
+        ("foo", trie["foo"]),
+    }
+    assert set(trie.iter_prefixes_with_ids("bar")) == {("bar", trie["bar"])}
+    assert not set(trie.iter_prefixes_with_ids("b"))
+
+    for test_key in ["foobar", "foo", "bar", "b"]:
+        assert list(trie.iter_prefixes_with_ids(test_key)) == [
+            (prefix, trie[prefix]) for prefix in trie.prefixes(test_key)
+        ]
+
+
 def test_keys():
     keys = ["foo", "f", "foobar", "bar"]
     trie = marisa_trie.Trie(keys)
@@ -210,7 +259,7 @@ def test_keys():
 def test_keys_prefix():
     keys = ["foo", "f", "foobar", "bar"]
     trie = marisa_trie.Trie(keys)
-    assert set(trie.keys("fo")) == set(["foo", "foobar"])
+    assert set(trie.keys("fo")) == {"foo", "foobar"}
     assert trie.keys("foobarz") == []
 
 
@@ -234,10 +283,10 @@ def test_items():
 def test_items_prefix():
     keys = ["foo", "f", "foobar", "bar"]
     trie = marisa_trie.Trie(keys)
-    assert set(trie.items("fo")) == set([
+    assert set(trie.items("fo")) == {
         ("foo", trie["foo"]),
         ("foobar", trie["foobar"]),
-    ])
+    }
 
 
 @given(st.sets(text))
@@ -250,23 +299,27 @@ def test_iteritems(keys):
         assert trie.items(prefix) == list(trie.iteritems(prefix))
 
 
+@pytest.mark.filterwarnings("ignore:Trie.has_keys_with_prefix is deprecated")
 def test_has_keys_with_prefix_empty():
     empty_trie = marisa_trie.Trie()
-    assert not empty_trie.has_keys_with_prefix('')
-    assert not empty_trie.has_keys_with_prefix('ab')
+    assert not empty_trie.has_keys_with_prefix("")
+    assert not empty_trie.has_keys_with_prefix("ab")
 
 
+@pytest.mark.filterwarnings("ignore:Trie.has_keys_with_prefix is deprecated")
 def test_has_keys_with_prefix():
-    fruit_trie = marisa_trie.BytesTrie([
-        ('apple', b'foo'),
-        ('pear', b'bar'),
-        ('peach', b'baz'),
-    ])
-    assert fruit_trie.has_keys_with_prefix('')
-    assert fruit_trie.has_keys_with_prefix('a')
-    assert fruit_trie.has_keys_with_prefix('pe')
-    assert fruit_trie.has_keys_with_prefix('pear')
-    assert not fruit_trie.has_keys_with_prefix('x')
+    fruit_trie = marisa_trie.BytesTrie(
+        [
+            ("apple", b"foo"),
+            ("pear", b"bar"),
+            ("peach", b"baz"),
+        ]
+    )
+    assert fruit_trie.has_keys_with_prefix("")
+    assert fruit_trie.has_keys_with_prefix("a")
+    assert fruit_trie.has_keys_with_prefix("pe")
+    assert fruit_trie.has_keys_with_prefix("pear")
+    assert not fruit_trie.has_keys_with_prefix("x")
 
 
 def test_invalid_file():
@@ -278,6 +331,6 @@ def test_invalid_file():
         pytest.fail("Exception is not raised")
 
 
-def test_mutable_mapping():
+def test_mapping():
     for method in Mapping.__abstractmethods__:
         assert hasattr(marisa_trie.Trie, method)

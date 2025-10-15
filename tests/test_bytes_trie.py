@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
 import io
 import pickle
+from collections.abc import Mapping
 
 import pytest
 import hypothesis.strategies as st
 from hypothesis import assume, given
 
 import marisa_trie
+
 from .utils import text
 
 
@@ -40,10 +38,7 @@ def test_getitem(keys, values, missing_key):
         trie[missing_key]
 
 
-@pytest.mark.parametrize("data", [
-    [],
-    [("foo", b"bar")]
-])
+@pytest.mark.parametrize("data", [[], [("foo", b"bar")]])
 def test_getitem_missing(data):
     trie = marisa_trie.BytesTrie(data)
     with pytest.raises(KeyError):
@@ -53,7 +48,7 @@ def test_getitem_missing(data):
 def test_getitem_multiple():
     data = [
         ("foo", b"x"),
-        ("fo",  b"y"),
+        ("fo", b"y"),
         ("foo", b"a"),
     ]
     trie = marisa_trie.BytesTrie(data)
@@ -71,7 +66,7 @@ def test_null_bytes_in_values():
 
 def test_items():
     data = [
-        ("fo",  b"y"),
+        ("fo", b"y"),
         ("foo", b"x"),
         ("foo", b"a"),
     ]
@@ -95,11 +90,13 @@ def test_iteritems(keys, values):
 
 
 def test_keys():
-    trie = marisa_trie.BytesTrie([
-        ("foo", b"x"),
-        ("fo",  b"y"),
-        ("foo", b"a"),
-    ])
+    trie = marisa_trie.BytesTrie(
+        [
+            ("foo", b"x"),
+            ("fo", b"y"),
+            ("foo", b"a"),
+        ]
+    )
 
     # FIXME: ordering?
     assert trie.keys() == ["foo", "foo", "fo"]
@@ -129,3 +126,8 @@ def test_dumps_loads(data):
     buf.seek(0)
 
     assert trie == pickle.load(buf)
+
+
+def test_mapping():
+    for method in Mapping.__abstractmethods__:
+        assert hasattr(marisa_trie.BytesTrie, method)
